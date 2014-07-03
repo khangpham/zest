@@ -1,4 +1,6 @@
-#
+require 'rubygems'
+require 'bundler/setup'
+
 # Assignment:
 #
 # Implement the methods as specfied in the following class, plus any you need to use to make your life easier.
@@ -8,6 +10,7 @@
 # presence of contaminants. Here's an excerpt of the table:
 # (from: http://file.lacounty.gov/bc/q3_2010/cms1_148456.pdf)
 # (All chemical values are in mg/L)
+#
 # | id | site                                      | chloroform | bromoform | bromodichloromethane | dibromichloromethane |
 # |  1 | LA Aquaduct Filteration Plant Effluent    |   .00104   | .00000    |  .00149              |  .00275              |
 # |  2 | North Hollywood Pump Station (well blend) |   .00291   | .00487    |  .00547              |  .0109               |
@@ -19,6 +22,8 @@
 #
 # (from http://water.epa.gov/drink/contaminants/index.cfm#List )
 class WaterSample
+  include DatabaseConnector
+  attr_accessor :id, :site, :chloroform_weight, :bromoform_weight, :bromodichloromethane_weight, :dibromichloromethane_weight
 
   # This class intends to ease the managing of the collected sample data, 
   # and assist in computing factors of the data.
@@ -26,17 +31,15 @@ class WaterSample
   # The schema it must interact with and some sample data should be delivered 
   # with your assignment as a MySQL dump
 
-  def self.find(sample_id)
-    # spec
-    # sample2 = WaterSample.find(2)
-    # sample2.site.should == "North Hollywood Pump Station (well blend)")
-    # sample2.chloroform.should == 0.00291
-    # sample2.bromoform.should == 0.00487
-    # sample2.bromodichloromethane.should == 0.00547
-    # sample2.dibromichloromethane.should == 0.0109
-    
-
-  end
+  # def self.find(sample_id)
+  #   # spec
+  #   # sample2 = WaterSample.find(2)
+  #   # sample2.site.should == "North Hollywood Pump Station (well blend)")
+  #   # sample2.chloroform.should == 0.00291
+  #   # sample2.bromoform.should == 0.00487
+  #   # sample2.bromodichloromethane.should == 0.00547
+  #   # sample2.dibromichloromethane.should == 0.0109
+  # end
 
   # Some Trihalomethanes are nastier than others, bromodichloromethane and 
   # bromoform are particularly bad. That is, water that has .060 mg/L of 
@@ -78,30 +81,54 @@ class WaterSample
   # 
   #
   # Return the value of the computed factor with id of factor_weights_id
+  #
+  # spec:
+  #  sample2 = WaterSample.find(2)
+  #  sample2.factor(6) #computes the 6th factor of sample #2
+  #    => .0213 
+  # Note that the factor for this example is from data not in the sample data 
+  # above, that's because I want you to be sure you understand how to compute
+  # this value conceptually.
   def factor(factor_weights_id)
-    # spec:
-    #  sample2 = WaterSample.find(2)
-    #  sample2.factor(6) #computes the 6th factor of sample #2
-    #    => .0213 
-    # Note that the factor for this example is from data not in the sample data 
-    # above, that's because I want you to be sure you understand how to compute
-    # this value conceptually.
-
+    factor_weight = @factor_weights ? local_factor_weight(factor_weights_id) : FactorWeight.find(factor_weights_id)
+    factor = chloroform_weight           * factor_weight.chloroform_weight +
+             bromoform_weight            * factor_weight.bromoform_weight +
+             bromodichloromethane_weight * factor_weight.bromodichloromethane_weight + 
+             dibromichloromethane_weight * factor_weight.dibromichloromethane_weight
   end
 
   # convert the object to a hash
   # if include_factors is true, inlcude all computed factors in the hash
+  #
+  # spec:
+  #  sample2.to_hash
+  #   => {:id =>2, :site => "North Hollywood Pump Station (well blend)", :chloroform => .00291, :bromoform => .00487, :bromodichloromethane => .00547 , :dibromichlormethane => .0109}
+  # sample2.to_hash(true) 
+  # #let's say only 3 factors exist in our factors table, with ids of 5, 6, and 9 
+  #   => {:id =>2, :site => "North Hollywood Pump Station (well blend)", :chloroform => .00291, :bromoform => .00487, :bromodichloromethane => .00547 , :dibromichlormethane => .0109, :factor_5 => .0213, :factor_6 => .0432, :factor_9 => 0.0321}
   def to_hash(include_factors = false)
-    # spec:
-    #  sample2.to_hash
-    #   => {:id =>2, :site => "North Hollywood Pump Station (well blend)", :chloroform => .00291, :bromoform => .00487, :bromodichloromethane => .00547 , :dibromichlormethane => .0109}
-    # sample2.to_hash(true) 
-    # #let's say only 3 factors exist in our factors table, with ids of 5, 6, and 9 
-    #   => {:id =>2, :site => "North Hollywood Pump Station (well blend)", :chloroform => .00291, :bromoform => .00487, :bromodichloromethane => .00547 , :dibromichlormethane => .0109, :factor_5 => .0213, :factor_6 => .0432, :factor_9 => 0.0321}
-    
+    hash = { id:                   id,
+             site:                 site,
+             chloroform:           chloroform_weight,
+             bromoform:            bromoform_weight,
+             bromodichloromethane: bromodichloromethane_weight,
+             dibromichlormethane:  dibromichlormethane }
+
+    if include_factors
+      factor_weights.each do |factor_weight|
+        hash.merge! { :"factor_#{factor_weight.id}" => factor(factor_weight.id) }
+      end
+    end
+    hash
   end
 
+  private
 
+  def factor_weights
+    @factor_weights ||= FactorWeight.all
+  end
 
+  def local_factor_weight(id)
+    @factor_weights.find { |fw| fw.id == id }.first
+  end
 end
-
