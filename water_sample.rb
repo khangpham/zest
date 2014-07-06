@@ -1,5 +1,9 @@
 require 'rubygems'
 require 'bundler/setup'
+require 'pry'
+require 'mysql2'
+require_relative 'database_connector'
+require_relative 'factor_weight'
 
 # Assignment:
 #
@@ -116,7 +120,7 @@ class WaterSample
 
     if include_factors
       factor_weights.each do |factor_weight|
-        hash.merge! { :"factor_#{factor_weight.id}" => factor(factor_weight.id) }
+        hash.merge!({ "factor_#{factor_weight.id}".to_sym => factor(factor_weight.id) })
       end
     end
     hash
@@ -132,3 +136,5 @@ class WaterSample
     @factor_weights.find { |fw| fw.id == id }.first
   end
 end
+
+pry

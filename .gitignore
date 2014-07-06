@@ -1,3 +1,5 @@
 *.swo
 *.swp
 Gemfile.lock
+add_user.sql
+database.yml
