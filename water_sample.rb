@@ -110,14 +110,15 @@ class WaterSample
   # #let's say only 3 factors exist in our factors table, with ids of 5, 6, and 9 
   #   => {:id =>2, :site => "North Hollywood Pump Station (well blend)", :chloroform => .00291, :bromoform => .00487, :bromodichloromethane => .00547 , :dibromichlormethane => .0109, :factor_5 => .0213, :factor_6 => .0432, :factor_9 => 0.0321}
   def to_hash(include_factors = false)
-    hash = { id:                   id,
-             site:                 site,
-             chloroform:           chloroform,
-             bromoform:            bromoform,
-             bromodichloromethane: bromodichloromethane,
-             dibromichlormethane:  dibromichlormethane }
+    hash = { id:                   self.id,
+             site:                 self.site,
+             chloroform:           self.chloroform,
+             bromoform:            self.bromoform,
+             bromodichloromethane: self.bromodichloromethane,
+             dibromichloromethane:  self.dibromichloromethane }
 
     if include_factors
+      # avoid N + 1 query scenario by loading all factor_weights
       factor_weights.each do |factor_weight|
         hash.merge!({ "factor_#{factor_weight.id}".to_sym => factor(factor_weight.id) })
       end
@@ -132,8 +133,6 @@ class WaterSample
   end
 
   def local_factor_weight(id)
-    @factor_weights.find { |fw| fw.id == id }.first
+    @factor_weights.find { |fw| fw.id == id }
   end
 end
-
-# pry

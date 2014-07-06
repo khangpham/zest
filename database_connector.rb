@@ -11,14 +11,14 @@ module DatabaseConnector
     # For simplicity, we are assuming ID will always be numeric
     def find(id)
       obj = self.new
-      results = client.query("SELECT * FROM #{self.name.pluralize.underscore} WHERE id = #{id}")
+      results = client.query("SELECT * FROM #{table_name} WHERE id = #{id}")
       raise Exception and return unless results # for simplicity, we'll keep it to the generic Exception class
       results.first.each_pair { |key, value| obj.instance_variable_set("@#{key}", value) }
       obj
     end
 
     def all
-      results = client.query("SELECT * FROM #{self.name.pluralize.underscore} ORDER BY id")
+      results = client.query("SELECT * FROM #{table_name} ORDER BY id")
       collection = []
       results.each do |result|
         obj = self.new
@@ -29,6 +29,7 @@ module DatabaseConnector
     end
 
     private
+
     def client
       @client ||= Mysql2::Client.new(host: config['host'], username: config['username'], password: config['password'], port: config['port'], database: config['database'])
     end
@@ -39,6 +40,10 @@ module DatabaseConnector
       rescue Errno::ENOENT => e
         e
       end
+    end
+
+    def table_name
+      self.name.pluralize.underscore
     end
   end
 end

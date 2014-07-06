@@ -23,4 +23,8 @@ describe FactorWeight do
     specify { expect(factor_weights.count).to eq(4) }
     specify { expect(factor_weights.map(&:chloroform_weight).sort).to eq([0, 0.8, 0.9, 1]) }
   end
+
+  describe "#table_name" do
+    specify { expect(FactorWeight.send(:table_name)).to eq('factor_weights') }
+  end
 end
