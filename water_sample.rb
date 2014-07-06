@@ -1,6 +1,5 @@
 require 'rubygems'
 require 'bundler/setup'
-require 'pry'
 require_relative 'database_connector'
 require_relative 'factor_weight'
 

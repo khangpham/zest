@@ -13,6 +13,12 @@ Create your database connection configuration in database.yml.
 > cp database.yml.example database.yml
 ```
 
+Install dependency gems
+
+```bash
+> bundle
+```
+
 Define your database connection info
 ```yaml
 host: localhost
