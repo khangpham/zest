@@ -1,7 +1,6 @@
 require 'rubygems'
 require 'bundler/setup'
 require 'pry'
-require 'mysql2'
 require_relative 'database_connector'
 require_relative 'factor_weight'
 
@@ -27,7 +26,7 @@ require_relative 'factor_weight'
 # (from http://water.epa.gov/drink/contaminants/index.cfm#List )
 class WaterSample
   include DatabaseConnector
-  attr_accessor :id, :site, :chloroform_weight, :bromoform_weight, :bromodichloromethane_weight, :dibromichloromethane_weight
+  attr_accessor :id, :site, :chloroform, :bromoform, :bromodichloromethane, :dibromichloromethane
 
   # This class intends to ease the managing of the collected sample data, 
   # and assist in computing factors of the data.
@@ -95,10 +94,10 @@ class WaterSample
   # this value conceptually.
   def factor(factor_weights_id)
     factor_weight = @factor_weights ? local_factor_weight(factor_weights_id) : FactorWeight.find(factor_weights_id)
-    factor = chloroform_weight           * factor_weight.chloroform_weight +
-             bromoform_weight            * factor_weight.bromoform_weight +
-             bromodichloromethane_weight * factor_weight.bromodichloromethane_weight + 
-             dibromichloromethane_weight * factor_weight.dibromichloromethane_weight
+    factor = self.chloroform           * factor_weight.chloroform_weight +
+             self.bromoform            * factor_weight.bromoform_weight +
+             self.bromodichloromethane * factor_weight.bromodichloromethane_weight + 
+             self.dibromichloromethane * factor_weight.dibromichloromethane_weight
   end
 
   # convert the object to a hash
@@ -113,9 +112,9 @@ class WaterSample
   def to_hash(include_factors = false)
     hash = { id:                   id,
              site:                 site,
-             chloroform:           chloroform_weight,
-             bromoform:            bromoform_weight,
-             bromodichloromethane: bromodichloromethane_weight,
+             chloroform:           chloroform,
+             bromoform:            bromoform,
+             bromodichloromethane: bromodichloromethane,
              dibromichlormethane:  dibromichlormethane }
 
     if include_factors
@@ -137,4 +136,4 @@ class WaterSample
   end
 end
 
-pry
+# pry

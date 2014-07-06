@@ -1,9 +1,13 @@
 source 'https://rubygems.org'
 
-gem 'rspec', :require => 'spec'
 gem 'mysql2'
 gem 'activesupport'
 
-group :development do
+group :development, :test do
   gem 'pry'
+  gem 'guard'
+  gem 'guard-rspec'
+  gem 'rspec', :require => 'spec'
+  gem 'rspec-mocks'
+  gem 'shoulda-matchers'
 end
