@@ -34,6 +34,7 @@ class WaterSample
   # with your assignment as a MySQL dump
 
   # def self.find(sample_id)
+  #   NOTE: method definition is in database_connector.rb
   #   # spec
   #   # sample2 = WaterSample.find(2)
   #   # sample2.site.should == "North Hollywood Pump Station (well blend)")
