@@ -1,7 +1,7 @@
 Setup
 =====
 
-Populate the database with the provided seed database in **water_sample_schema.sql**
+Populate the database with the provided schema & seed data **water_sample_schema.sql**
 
 ```bash
 > mysql -h localhost -u <username> -p -D factor_hw < water_sample_schema.sql 
@@ -24,8 +24,8 @@ Define your database connection info
 host: localhost
 database: factor_hw
 port: 3306
-username: 
-password: 
+username: <your_username>
+password: <your_password>
 ```
 
 Run Tests
